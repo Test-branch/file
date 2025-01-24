@@ -36,8 +36,8 @@ jobs:
 
       - name: Commit and Push CSV
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "AravindaHD"
+          git config --global user.email "test.noreply.github.com"
           git checkout -b aide-ids-report
           git add aide_ids/aide_ids.csv
           git commit -m "Add AIDE IDs report"
