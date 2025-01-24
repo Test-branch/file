@@ -1,0 +1,41 @@
+name: Extract AIDE IDs
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs daily at midnight
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  extract-aide-ids:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: List all repositories
+        id: list-repos
+        run: |
+          curl -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
+               -H "Accept: application/vnd.github.v3+json" \
+               https://api.github.com/orgs/Test-branch/repos \
+               > repos.json
+
+      - name: Extract AIDE IDs
+        run: |
+          mkdir -p aide_ids
+          echo "Repository,AIDE ID" > aide_ids/aide_ids.csv
+          for repo in $(jq -r '.[].name' repos.json); do
+            git clone https://github.com/Test-branch/$repo.git
+            if [ -f $repo/vitals.yml ]; then
+              aide_id=$(grep 'aide_id' $repo/vitals.yml | awk '{print $2}')
+              echo "$repo,$aide_id" >> aide_ids/aide_ids.csv
+            fi
+            rm -rf $repo
+          done
+
+      - name: Upload AIDE IDs
+        uses: actions/upload-artifact@v2
+        with:
+          name: aide_ids
+          path: aide_ids/aide_ids.csv
