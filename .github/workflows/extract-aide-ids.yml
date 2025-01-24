@@ -34,8 +34,11 @@ jobs:
             rm -rf $repo
           done
 
-      - name: Upload AIDE IDs
-        uses: actions/upload-artifact@v2
-        with:
-          name: aide_ids
-          path: aide_ids/aide_ids.csv
+      - name: Commit and Push CSV
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b aide-ids-report
+          git add aide_ids/aide_ids.csv
+          git commit -m "Add AIDE IDs report"
+          git push origin aide-ids-report
